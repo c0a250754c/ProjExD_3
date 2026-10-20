@@ -170,7 +170,8 @@ def main():
             if beam is not None:
                 if beam.rct.colliderect(bomb.rct):  # ビームと爆弾の衝突判定
                     beam = None
-                    bomb = None    
+                    bomb = None 
+                    bird.change_img(6, screen)   
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
@@ -190,4 +191,4 @@ if __name__ == "__main__":
     pg.init()
     main()
     pg.quit()
-    sys.exit()  # あいう
+    sys.exit()  
