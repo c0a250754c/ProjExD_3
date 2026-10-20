@@ -162,6 +162,34 @@ class Score:
         self.img = self.fonto.render(f"Score: {self.score}", 0, self.color)
         screen.blit(self.img, self.rct)
 
+
+class Explosion:
+    """
+    爆弾が撃ち落とされたときの爆発エフェクトに関するクラス
+    """
+    def __init__(self, bomb: "Bomb"):
+        """
+        爆発画像Surfaceのリストを生成する
+        引数 bomb：爆発した爆弾（Bombインスタンス）
+        """
+        img = pg.image.load("fig/explosion.gif")
+        self.imgs = [img, pg.transform.flip(img, True, True)]  # 元の画像と上下左右反転
+        self.img = self.imgs[0]
+        self.rct = self.img.get_rect()
+        self.rct.center = bomb.rct.center  # 爆発した爆弾の位置
+        self.life = 50  # 爆発時間（フレーム数）
+
+    def update(self, screen: pg.Surface):
+        """
+        爆発時間を1減算し，残っている間は画像を切り替えて爆発を演出する
+        引数 screen：画面Surface
+        """
+        self.life -= 1
+        if self.life > 0:
+            self.img = self.imgs[self.life // 10 % 2]  # 10フレームごとに切り替え
+            screen.blit(self.img, self.rct)
+
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
@@ -169,6 +197,7 @@ def main():
     bird = Bird((300, 200))
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     beams = []  # Beamインスタンス用の空リスト
+    exps = []  # Explosionインスタンス用の空リスト
     score = Score()  # 追加
     clock = pg.time.Clock()
     tmr = 0
@@ -195,6 +224,7 @@ def main():
         for j, beam in enumerate(beams):
             if beam is not None and beam.rct.colliderect(bomb.rct):
                 if beam.rct.colliderect(bomb.rct):  # ビームと爆弾の衝突判定
+                    exps.append(Explosion(bomb))  # 追加：爆発を生成
                     beams[j] = None
                     bombs[i] = None 
                     bird.change_img(6, screen)
@@ -206,13 +236,17 @@ def main():
         beams = [beam for beam in beams
                  if beam is not None and check_bound(beam.rct) == (True, True)]         
 
+        exps = [exp for exp in exps if exp.life > 0]  # 追加：爆発が終わったものを除く
+
         key_lst = pg.key.get_pressed()
-        bird.update(key_lst, screen)
+        bird.update(key_lst, screen) 
 
         for beam in beams:
             beam.update(screen)  
         for bomb in bombs:
             bomb.update(screen)
+        for exp in exps:  # 追加
+            exp.update(screen)    
         score.update(screen)  # 追加    
         pg.display.update()
         tmr += 1
