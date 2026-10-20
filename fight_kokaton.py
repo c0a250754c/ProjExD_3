@@ -158,7 +158,7 @@ class Score:
         self.score = 0
         self.img = self.fonto.render(f"Score: {self.score}", 0, self.color)
         self.rct = self.img.get_rect()
-        self.rct.center = 100, HEIGHT-50  # 画面左下
+        self.rct.center = 100, HEIGHT -50  # 画面左下
 
     def update(self, screen: pg.Surface):
         """
